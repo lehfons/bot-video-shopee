@@ -19,15 +19,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         print(f"Novo utilizador registado permanentemente: {user_id}. Total: {len(user_ids)}")
 
     if user_id in ADMIN_IDS:
-        # CORREÇÃO: Escapados os caracteres '<' e '>' para serem compatíveis com MarkdownV2
+        # CORREÇÃO: Formatação Markdown V2 correta e ativação do parse_mode
         mensagem_start = (
             "*Olá, veja como utilizar os comandos*\n\n"
             "🔹 */add1 a /add6*: Carrega produtos da fila\.\n"
             "🔹 */pendentes*: Mostra a quantidade de produtos na fila\.\n"
             "🔹 */addmanual*: Adiciona produtos manualmente\.\n"
-            "🔹 */video \<link\>*: Envia o vídeo para os utilizadores do último lote\.\n"
-            "🔹 */esgotado \<link\>*: Notifica o utilizador que o produto está esgotado\.\n"
-            "🔹 */bugado \<link\>*: Notifica o utilizador que o produto está bugado\.\n"
+            "🔹 */video <link>*: Envia o vídeo para os utilizadores do último lote\.\n"
+            "🔹 */esgotado <link>*: Notifica o utilizador que o produto está esgotado\.\n"
+            "🔹 */bugado <link>*: Notifica o utilizador que o produto está bugado\.\n"
             "🔹 *Responder a uma mensagem de suporte encaminhada* para falar com o utilizador\."
         )
         admin_keyboard_layout = [
@@ -38,6 +38,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             ['/video', '/deletarvideo']
         ]
         keyboard = ReplyKeyboardMarkup(admin_keyboard_layout, resize_keyboard=True)
+        # Adicionado parse_mode=ParseMode.MARKDOWN_V2
         await update.message.reply_text(mensagem_start, reply_markup=keyboard, parse_mode=ParseMode.MARKDOWN_V2)
     else:
         mensagem_start = "Olá! Bem-vindo(a) ao Bot de Adicionar Produtos na Shopee Vídeos 🛍️\n\nSelecione uma opção no menu abaixo:"

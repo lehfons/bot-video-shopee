@@ -23,6 +23,7 @@ async def add_links(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("A fila de links dos utilizadores está vazia. ✅")
         return
     
+    # Garante que não processamos mais links do que os que existem na fila
     num_to_process = min(num_to_add, len(fila))
     items_to_process = fila[:num_to_process]
     
@@ -138,7 +139,7 @@ async def add(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
 
 async def video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Converte um link de vídeo, envia para os utilizadores e retorna o link convertido para o admin."""
+    """Converte um link de vídeo e envia para os utilizadores do último lote (manual ou da fila)."""
     user_id = update.effective_user.id
     if user_id not in ADMIN_IDS: return
 
@@ -195,7 +196,6 @@ async def video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 falha += 1
                 print(f"Falha ao enviar vídeo para o ID {uid}: {e}")
         
-        # --- MELHORIA: Nova mensagem de confirmação para o admin ---
         link_escaped = escape_markdown(converted_video_link, version=2)
         if falha > 0:
             mensagem_final = (
@@ -206,13 +206,12 @@ async def video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             )
         else:
             mensagem_final = (
-                f"✅ *Sucesso!* Os utilizadores foram notificados! 🎉\n\n"
+                f"✅ *Sucesso\!* Os utilizadores foram notificados\! 🎉\n\n"
                 f"*Link do vídeo gerado:*\n{link_escaped}"
             )
         
         await update.message.reply_text(mensagem_final, parse_mode=ParseMode.MARKDOWN_V2)
     
-    # Limpa a memória de qualquer lote anterior
     context.user_data.clear()
 
 async def cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -378,6 +377,7 @@ async def handle_admin_message(update: Update, context: ContextTypes.DEFAULT_TYP
         if match:
             user_id_to_reply = int(match.group(1))
             try:
+                # CORREÇÃO: Adiciona formatação à resposta do suporte
                 response_text = f"📨 *Resposta do Suporte:*\n\n{escape_markdown(message.text, version=2)}"
                 await context.bot.send_message(
                     chat_id=user_id_to_reply,
@@ -388,11 +388,11 @@ async def handle_admin_message(update: Update, context: ContextTypes.DEFAULT_TYP
             except Exception as e:
                 error_text = (
                     "❌ Falha ao enviar a resposta.\n\n"
-                    "**Possíveis causas:**\n"
-                    "1. O utilizador pode ter bloqueado o bot.\n"
-                    "2. O utilizador nunca iniciou uma conversa privada com o bot (envie-lhe o link do bot e peça para ele enviar /start)."
+                    "*Possíveis causas:*\n"
+                    "1\. O utilizador pode ter bloqueado o bot\.\n"
+                    "2\. O utilizador nunca iniciou uma conversa privada com o bot \(envie\-lhe o link do bot e peça para ele enviar /start\)\."
                 )
-                await update.message.reply_text(error_text)
+                await update.message.reply_text(error_text, parse_mode=ParseMode.MARKDOWN_V2)
             return
 
     await update.message.reply_text("Comando ou mensagem não reconhecido. Use uma das opções do menu ou responda a um pedido de suporte.")
