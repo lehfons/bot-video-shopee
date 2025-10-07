@@ -50,8 +50,12 @@ async def add_links(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(formatted_message, parse_mode=ParseMode.MARKDOWN_V2)
 
     context.bot_data['link_queue'] = fila[num_to_process:]
-    await update.message.reply_text(f"Pronto! {num_to_process} links foram processados. Restam {len(context.bot_data['link_queue'])}.\n\n"
-                                    "Agora, crie o vídeo e use o comando:\n`/video <link_do_video>`")
+    # CORREÇÃO: Adicionada formatação e escape de caracteres
+    mensagem_final = (
+        f"Pronto\! {num_to_process} links foram processados\. Restam {len(context.bot_data['link_queue'])}\.\n\n"
+        "Agora, crie o vídeo e use o comando:\n`/video <link_do_video>`"
+    )
+    await update.message.reply_text(mensagem_final, parse_mode=ParseMode.MARKDOWN_V2)
 
 async def pendentes(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Informa o admin sobre a quantidade de links na fila principal."""
@@ -387,7 +391,7 @@ async def handle_admin_message(update: Update, context: ContextTypes.DEFAULT_TYP
                 await update.message.reply_text("✅ A sua resposta foi enviada ao utilizador.")
             except Exception as e:
                 error_text = (
-                    "❌ Falha ao enviar a resposta.\n\n"
+                    "❌ *Falha ao enviar a resposta*\.\n\n"
                     "*Possíveis causas:*\n"
                     "1\. O utilizador pode ter bloqueado o bot\.\n"
                     "2\. O utilizador nunca iniciou uma conversa privada com o bot \(envie\-lhe o link do bot e peça para ele enviar /start\)\."
